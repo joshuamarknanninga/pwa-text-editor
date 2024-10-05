@@ -13,7 +13,7 @@ module.exports = {
     publicPath: '/',
     clean: true, // Cleans the output directory before emit
   },
-  mode: 'development',
+  mode: 'development', // Change to 'production' for production builds
   module: {
     rules: [
       {
@@ -48,7 +48,7 @@ module.exports = {
       publicPath: './',
       icons: [
         {
-          src: path.resolve('public/assets/icon.png'),
+          src: path.resolve(__dirname, 'public/assets/icon.png'),
           sizes: [96, 128, 192, 256, 384, 512], // Multiple sizes
           destination: path.join('assets', 'icons'),
         },
@@ -95,3 +95,4 @@ module.exports = {
     extensions: ['.js'],
   },
 };
+
