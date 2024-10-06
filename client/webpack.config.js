@@ -6,33 +6,29 @@ const WebpackPwaManifest = require('webpack-pwa-manifest');
 const { GenerateSW } = require('workbox-webpack-plugin');
 
 module.exports = {
-  // Define the entry point of your application
-  entry: path.resolve(__dirname, 'src/index.js'),
-
-  // Define the output directory and filename
+  entry: path.resolve(__dirname, 'src/index.js'), // Absolute path to src/index.js
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
     publicPath: '/', // Ensures proper routing for SPA
     clean: true, // Cleans the output directory before emit
   },
-
-  // Set the mode to 'production' or 'development'
-  mode: 'production',
-
-  // Define module rules for different file types
+  mode: 'production', // Use 'development' for development builds
   module: {
     rules: [
       {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader', // Transpiles ES6+ to ES5
+          loader: 'babel-loader', // Ensure babel-loader is installed
+          options: {
+            presets: ['@babel/preset-env', '@babel/preset-react'], // Add React preset
+          },
         },
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader'], // Injects CSS into the DOM
+        use: ['style-loader', 'css-loader'], // Ensure these loaders are installed
       },
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
@@ -40,11 +36,9 @@ module.exports = {
       },
     ],
   },
-
-  // Define plugins used in the build process
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, 'public/index.html'), // Path to your HTML template
+      template: path.resolve(__dirname, 'public/index.html'), // Absolute path to index.html
       title: 'PWA Text Editor',
     }),
     new WebpackPwaManifest({
@@ -59,9 +53,9 @@ module.exports = {
       inject: true, // Injects the manifest link into index.html
       icons: [
         {
-          src: path.resolve(__dirname, 'public/assets/icon.png'), // Path to your icon
-          sizes: [96, 128, 192, 256, 384, 512], // Multiple sizes for different devices
-          destination: path.join('assets', 'icons'), // Destination folder within 'dist'
+          src: path.resolve(__dirname, 'public/assets/icon.png'), // Absolute path to icon.png
+          sizes: [96, 128, 192, 256, 384, 512], // Multiple sizes
+          destination: path.join('assets', 'icons'),
         },
       ],
     }),
@@ -96,17 +90,13 @@ module.exports = {
       ],
     }),
   ],
-
-  // Define development server configurations
   devServer: {
     static: path.resolve(__dirname, 'dist'),
     port: 8080,
-    open: true, // Automatically opens the browser
+    open: true,
     historyApiFallback: true, // For SPA routing
   },
-
-  // Resolve file extensions
   resolve: {
-    extensions: ['.js'],
+    extensions: ['.js'], // Resolves these extensions
   },
 };
