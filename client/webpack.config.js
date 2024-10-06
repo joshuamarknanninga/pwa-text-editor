@@ -6,36 +6,36 @@ const WebpackPwaManifest = require('webpack-pwa-manifest');
 const { GenerateSW } = require('workbox-webpack-plugin');
 
 module.exports = {
-  entry: './src/index.js',
+  entry: path.resolve(__dirname, 'src/index.js'), // Absolute path to src/index.js
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
-    publicPath: '/',
+    publicPath: '/', // Ensures proper routing for SPA
     clean: true, // Cleans the output directory before emit
   },
-  mode: 'development', // Change to 'production' for production builds
+  mode: 'production', // Use 'development' for development builds
   module: {
     rules: [
       {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
+          loader: 'babel-loader', // Ensure babel-loader is installed
         },
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
+        use: ['style-loader', 'css-loader'], // Ensure these loaders are installed
       },
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
-        type: 'asset/resource',
+        type: 'asset/resource', // Handles image files
       },
     ],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './public/index.html',
+      template: path.resolve(__dirname, 'public/index.html'), // Absolute path to index.html
       title: 'PWA Text Editor',
     }),
     new WebpackPwaManifest({
@@ -46,9 +46,11 @@ module.exports = {
       theme_color: '#ffffff',
       start_url: './',
       publicPath: './',
+      fingerprints: false, // Prevents adding a hash to manifest.json
+      inject: true, // Injects the manifest link into index.html
       icons: [
         {
-          src: path.resolve(__dirname, 'public/assets/icon.png'),
+          src: path.resolve(__dirname, 'public/assets/icon.png'), // Absolute path to icon.png
           sizes: [96, 128, 192, 256, 384, 512], // Multiple sizes
           destination: path.join('assets', 'icons'),
         },
@@ -92,6 +94,6 @@ module.exports = {
     historyApiFallback: true, // For SPA routing
   },
   resolve: {
-    extensions: ['.js'],
+    extensions: ['.js'], // Resolves these extensions
   },
 };

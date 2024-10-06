@@ -1,0 +1,158 @@
+// client/src/components/TextEditor.js
+
+import React, { useState, useEffect } from 'react';
+import { openDB } from 'idb';
+
+const TextEditor = () => {
+  const [text, setText] = useState('');
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  // Initialize IndexedDB
+  useEffect(() => {
+    const initDB = async () => {
+      try {
+        const db = await openDB('text-editor-db', 1, {
+          upgrade(db) {
+            if (!db.objectStoreNames.contains('notes')) {
+              db.createObjectStore('notes', { keyPath: 'id', autoIncrement: true });
+            }
+          },
+        });
+
+        // Retrieve the first note if it exists
+        const allNotes = await db.getAll('notes');
+        if (allNotes.length > 0) {
+          setText(allNotes[0].content);
+        }
+      } catch (error) {
+        console.error('Failed to open IndexedDB:', error);
+      }
+    };
+
+    initDB();
+  }, []);
+
+  // Listen for beforeinstallprompt event
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // Listen for appinstalled event
+    window.addEventListener('appinstalled', () => {
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+    });
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', () => {});
+    };
+  }, []);
+
+  // Save text to IndexedDB
+  const saveText = async () => {
+    try {
+      const db = await openDB('text-editor-db', 1);
+      const existingNotes = await db.getAll('notes');
+
+      if (existingNotes.length > 0) {
+        // Update the first note
+        await db.put('notes', { id: existingNotes[0].id, content: text });
+      } else {
+        // Add a new note
+        await db.add('notes', { content: text });
+      }
+
+      alert('Text saved successfully!');
+    } catch (error) {
+      console.error('Failed to save text:', error);
+      alert('Failed to save text.');
+    }
+  };
+
+  // Handle Install Button Click
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+      setDeferredPrompt(null);
+      setIsInstalled(true);
+    } else {
+      console.log('User dismissed the install prompt');
+    }
+  };
+
+  return (
+    <div style={styles.container}>
+      <h1>PWA Text Editor</h1>
+      <textarea
+        style={styles.textarea}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Start typing..."
+        rows="15"
+        cols="80"
+      />
+      <div style={styles.buttonContainer}>
+        <button style={styles.button} onClick={saveText}>
+          Save
+        </button>
+        {!isInstalled && deferredPrompt && (
+          <button style={styles.button} onClick={handleInstallClick}>
+            Install
+          </button>
+        )}
+        {isInstalled && <span style={styles.installedText}>PWA Installed!</span>}
+      </div>
+    </div>
+  );
+};
+
+// Inline Styles for Simplicity
+const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '20px',
+    fontFamily: 'Arial, sans-serif',
+  },
+  textarea: {
+    width: '80%',
+    padding: '10px',
+    fontSize: '16px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+    resize: 'vertical',
+  },
+  buttonContainer: {
+    marginTop: '10px',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  button: {
+    padding: '10px 20px',
+    marginRight: '10px',
+    backgroundColor: '#007bff',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '16px',
+  },
+  installedText: {
+    color: 'green',
+    fontWeight: 'bold',
+  },
+};
+
+export default TextEditor;
