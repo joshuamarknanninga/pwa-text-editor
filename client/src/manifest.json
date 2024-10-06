@@ -1,0 +1,21 @@
+{
+    "short_name": "TextEditor",
+    "name": "PWA Text Editor",
+    "icons": [
+      {
+        "src": "assets/icons/icon_192x192.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "assets/icons/icon_512x512.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff"
+  }
+  
