@@ -33,24 +33,24 @@ const TextEditor = () => {
     initDB();
   }, []);
 
-  // Listen for beforeinstallprompt and appinstalled events
+  // Listen for beforeinstallprompt event
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
     };
 
-    const handleAppInstalled = () => {
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // Listen for appinstalled event
+    window.addEventListener('appinstalled', () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
+    });
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('appinstalled', () => {});
     };
   }, []);
 
