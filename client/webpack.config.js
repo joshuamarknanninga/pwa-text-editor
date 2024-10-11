@@ -64,15 +64,12 @@ module.exports = {
       skipWaiting: true,
       runtimeCaching: [
         {
-          urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
-          handler: 'CacheFirst',
+          urlPattern: /index.html/,
+          handler: 'NetworkFirst',
           options: {
-            cacheName: 'images',
-            expiration: {
-              maxEntries: 10,
+            cacheName: 'html-cache',
             },
           },
-        },
         {
           urlPattern: /\.(?:js|css)$/,
           handler: 'StaleWhileRevalidate',

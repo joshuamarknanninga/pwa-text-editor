@@ -4,9 +4,51 @@ import React, { useState, useEffect } from 'react';
 import { openDB } from 'idb';
 
 const TextEditor = () => {
+  // State for the text area
   const [text, setText] = useState('');
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  // State for PWA installation
   const [isInstalled, setIsInstalled] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  // Styles Object
+  const styles = {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      padding: '20px',
+      fontFamily: 'Arial, sans-serif',
+    },
+    textarea: {
+      width: '80%',
+      padding: '10px',
+      fontSize: '16px',
+      borderRadius: '4px',
+      border: '1px solid #ccc',
+      resize: 'vertical',
+      minHeight: '200px',
+    },
+    buttonContainer: {
+      marginTop: '10px',
+      display: 'flex',
+      alignItems: 'center',
+    },
+    button: {
+      padding: '10px 20px',
+      marginRight: '10px',
+      backgroundColor: '#007bff',
+      color: '#ffffff',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      fontSize: '16px',
+    },
+    installedText: {
+      color: 'green',
+      fontWeight: 'bold',
+    },
+  };
 
   // Initialize IndexedDB
   useEffect(() => {
@@ -33,24 +75,30 @@ const TextEditor = () => {
     initDB();
   }, []);
 
-  // Listen for beforeinstallprompt event
+  // Handle PWA Installation Events
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // Listen for appinstalled event
-    window.addEventListener('appinstalled', () => {
+    const handleAppInstalled = () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
-    });
+      console.log('PWA was installed');
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    // Check if the app is already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true);
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', () => {});
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
@@ -111,48 +159,10 @@ const TextEditor = () => {
             Install
           </button>
         )}
-        {isInstalled && <span style={styles.installedText}>PWA Installed!</span>}
+        {isInstalled && <span style={styles.installedText}>PWA Installed</span>}
       </div>
     </div>
   );
-};
-
-// Inline Styles for Simplicity
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '20px',
-    fontFamily: 'Arial, sans-serif',
-  },
-  textarea: {
-    width: '80%',
-    padding: '10px',
-    fontSize: '16px',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-    resize: 'vertical',
-  },
-  buttonContainer: {
-    marginTop: '10px',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  button: {
-    padding: '10px 20px',
-    marginRight: '10px',
-    backgroundColor: '#007bff',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '16px',
-  },
-  installedText: {
-    color: 'green',
-    fontWeight: 'bold',
-  },
 };
 
 export default TextEditor;
